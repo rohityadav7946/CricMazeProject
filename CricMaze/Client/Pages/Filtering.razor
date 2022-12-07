@@ -1,0 +1,74 @@
+﻿@page "/filtering"
+@using CricMaze.Shared
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+
+<SfGrid @ref="playerGrid" DataSource="@Players" AllowPaging="true" AllowFiltering="true">
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" Mode="FilterBarMode.Immediate" ImmediateModeDelay="300"></GridFilterSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(Player.PlayerId) HeaderText="Player ID"></GridColumn>
+        <GridColumn Field=@nameof(Player.FirstName) HeaderText="First Name"></GridColumn>
+        <GridColumn Field=@nameof(Player.LastName) HeaderText=" Last Name"></GridColumn>
+        <GridColumn Field=@nameof(Player.Country) HeaderText="Country" FilterSettings="@(new FilterSettings() {Type = Syncfusion.Blazor.Grids.FilterType.Excel })"></GridColumn>
+        <GridColumn Field=@nameof(Player.Role) HeaderText="Role">
+            <FilterTemplate>
+                <SfDropDownList Placeholder="All" DataSource="@roleDropDownSource" TItem="DropDownListItem" TValue="string">
+                    <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                    <DropDownListEvents TItem="DropDownListItem" TValue="string" ValueChange="@RoleSelectionChange"></DropDownListEvents>
+                </SfDropDownList>
+            </FilterTemplate>
+        </GridColumn>
+
+
+        <GridColumn Field=@nameof(Player.Matches) HeaderText="Matches"></GridColumn>
+        <GridColumn Field=@nameof(Player.Runs) HeaderText="Runs"></GridColumn>
+        <GridColumn Field=@nameof(Player.Highest) HeaderText="Highest"></GridColumn>
+        <GridColumn Field=@nameof(Player.Wickets) HeaderText="Wickets"></GridColumn>
+        <GridForeignColumn Field=@nameof(Player.TeamId) HeaderText="Team" ForeignDataSource="@Teams" ForeignKeyValue="TeamName"></GridForeignColumn>
+
+    </GridColumns>
+
+
+</SfGrid>
+
+
+
+
+
+@code {
+    public List<Player> Players { get; set; }
+
+    public SfGrid<Player> playerGrid { get; set; }
+
+    protected void RoleSelectionChange(ChangeEventArgs<string, DropDownListItem> args)
+    {
+        if (args.Value == "All")
+        {
+            playerGrid.ClearFiltering("Role");
+        }
+        else
+        {
+            playerGrid.FilterByColumn("Role", "equal", args.Value);
+        }
+
+
+    }
+
+
+    [Inject]
+    public IPlayerService PlayerService { get; set; }
+
+    public List<Team> Teams { get; set; }
+    [Inject]
+    public ITeamService TeamService { get; set; }
+
+    List<DropDownListItem> roleDropDownSource = EnumHelper.ConvertEnumToDropDownSource<Role>("All","All");
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Players = (await PlayerService.GetAllPlayers()).ToList();
+        Teams = (await TeamService.GetTeams()).ToList();
+    }
+}

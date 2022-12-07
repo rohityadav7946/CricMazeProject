@@ -1,0 +1,55 @@
+﻿@page "/grouping"
+@using CricMaze.Shared
+@using Syncfusion.Blazor.Grids
+
+<SfGrid DataSource="@Players" AllowGrouping="true">
+    <GridGroupSettings ShowGroupedColumn="true" ShowUngroupButton="false" ShowToggleButton="true">
+        <CaptionTemplate>
+            @{ 
+                var player = (context as CaptionTemplateContext);
+                <div> @player.Field : @player.Key - @player.Count Players</div>
+            }
+            
+        </CaptionTemplate>
+    </GridGroupSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(Player.PlayerId) HeaderText="Player ID"></GridColumn>
+        <GridColumn Field=@nameof(Player.FirstName) HeaderText="First Name"></GridColumn>
+        <GridColumn Field=@nameof(Player.LastName) HeaderText=" Last Name"></GridColumn>
+        <GridColumn Field=@nameof(Player.Country) HeaderText="Country"></GridColumn>
+        <GridColumn Field=@nameof(Player.Role) HeaderText="Role"></GridColumn>
+
+        <GridColumn Field=@nameof(Player.Matches) HeaderText="Matches"></GridColumn>
+        <GridColumn Field=@nameof(Player.Runs) HeaderText="Runs"></GridColumn>
+        <GridColumn Field=@nameof(Player.Highest) HeaderText="Highest"></GridColumn>
+        <GridColumn Field=@nameof(Player.Wickets) HeaderText="Wickets"></GridColumn>
+        <GridColumn Field="Team.TeamName" HeaderText="Team"></GridColumn>
+
+        @*<GridForeignColumn Field=@nameof(Player.TeamId) HeaderText="Team" ForeignDataSource="@Teams" ForeignKeyValue="TeamName"></GridForeignColumn>*@
+
+    </GridColumns>
+   
+
+</SfGrid>
+
+
+
+
+
+@code {
+    public List<Player> Players { get; set; }
+
+    [Inject]
+    public IPlayerService PlayerService{ get; set; }
+    public List<Team> Teams { get; set; }
+    [Inject]
+   public ITeamService TeamService { get; set; }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Players = (await PlayerService.GetAllPlayers()).ToList();
+        Teams = (await TeamService.GetTeams()).ToList();
+    }
+}

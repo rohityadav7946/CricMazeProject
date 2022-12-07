@@ -1,0 +1,32 @@
+﻿@page "/"
+@using CricMaze.Shared
+@using Syncfusion.Blazor.Grids
+
+
+
+    <SfGrid TValue="Player" AllowPaging="true" AllowSorting="true" AllowMultiSorting="false">
+        <SfDataManager Adaptor="Adaptors.CustomAdaptor" AdaptorInstance="@typeof(PlayerAdaptor)"></SfDataManager>
+        <GridPageSettings PageSize="5" PageSizes="@pagerDropDown" PageCount="3"></GridPageSettings>
+        <GridSortSettings AllowUnsort="false">
+            <GridSortColumns>
+                <GridSortColumn Field="PlayerId" Direction="SortDirection.Ascending"></GridSortColumn>
+            </GridSortColumns>
+        </GridSortSettings>
+        <GridColumns>
+            <GridColumn Field=@nameof(Player.PlayerId) HeaderText="Player ID"></GridColumn>
+            <GridColumn Field=@nameof(Player.FirstName) HeaderText="First Name"></GridColumn>
+            <GridColumn Field=@nameof(Player.LastName) HeaderText=" Last Name"></GridColumn>
+            <GridColumn Field=@nameof(Player.Country) HeaderText="Country"></GridColumn>
+            <GridColumn Field=@nameof(Player.Matches) HeaderText="Matches"></GridColumn>
+            <GridColumn Field=@nameof(Player.Runs) HeaderText="Runs"></GridColumn>
+            <GridColumn Field=@nameof(Player.Highest) HeaderText="Highest"></GridColumn>
+            <GridColumn Field=@nameof(Player.Wickets) HeaderText="Wickets"></GridColumn>
+        </GridColumns>
+    </SfGrid>
+
+
+
+@code{
+    public string[] pagerDropDown { get; set; } = new string[] { "All", "5", "10", "15", "20" };
+}
+

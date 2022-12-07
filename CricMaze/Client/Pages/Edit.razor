@@ -1,0 +1,80 @@
+﻿@page "/edit"
+@using CricMaze.Shared
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+
+<SfGrid @ref="playerGrid" DataSource="@Players" AllowPaging="true" Toolbar="@(new List<string>() { "Add", "Edit", "Update", "Delete", "Cancel" })">
+    <GridPageSettings PageSize="5"></GridPageSettings>
+    <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
+    <GridEvents OnActionBegin="ActionBeginHandler" TValue="Player"></GridEvents>
+    <GridColumns>
+        <GridColumn AllowAdding="false" IsPrimaryKey="true" Field=@nameof(Player.PlayerId) HeaderText="Player ID"></GridColumn>
+        <GridColumn Field=@nameof(Player.FirstName) HeaderText="First Name"></GridColumn>
+        <GridColumn Field=@nameof(Player.LastName) HeaderText=" Last Name"></GridColumn>
+        <GridColumn Field=@nameof(Player.Country) HeaderText="Country"></GridColumn>
+        <GridColumn Field=@nameof(Player.Role) HeaderText="Role">
+            <EditTemplate>
+                <SfDropDownList ID="Role" DataSource="@RoleEnumValues" TItem="string" TValue="Role" @bind-Value ="@((context as Player).Role)">
+                    
+                </SfDropDownList>
+            </EditTemplate>
+        </GridColumn>
+
+        <GridColumn Field=@nameof(Player.Matches) HeaderText="Matches"></GridColumn>
+        <GridColumn Field=@nameof(Player.Runs) HeaderText="Runs"></GridColumn>
+        <GridColumn Field=@nameof(Player.Highest) HeaderText="Highest"></GridColumn>
+        <GridColumn Field=@nameof(Player.Wickets) HeaderText="Wickets"></GridColumn>
+        <GridForeignColumn Field=@nameof(Player.TeamId) HeaderText="Team" ForeignDataSource="@Teams" ForeignKeyValue="TeamName"></GridForeignColumn>
+
+    </GridColumns>
+
+
+</SfGrid>
+
+
+
+
+
+@code {
+    public List<Player> Players { get; set; }
+
+    [Inject]
+    public IPlayerService PlayerService { get; set; }
+    public List<Team> Teams { get; set; }
+    [Inject]
+    public ITeamService TeamService { get; set; }
+
+    public SfGrid<Player> playerGrid { get; set; }
+
+    public string[] RoleEnumValues { get; set; } = Enum.GetNames(typeof(Role));
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Players = (await PlayerService.GetAllPlayers()).ToList();
+        Teams = (await TeamService.GetTeams()).ToList();
+    }
+
+    public async void ActionBeginHandler(ActionEventArgs<Player> Args)
+    {
+        if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
+        {
+            if (Args.Action == "Add")
+            {
+                await PlayerService.AddPlayer(Args.Data);
+                Players = (await PlayerService.GetAllPlayers()).ToList();
+                playerGrid.Refresh();
+            }
+            else
+            {
+                await PlayerService.UpdatePlayer(Args.Data);
+            }
+        }
+
+        if (Args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+        {
+            await PlayerService.DeletePlayer(Args.Data.PlayerId);
+        }
+    }
+}
+
